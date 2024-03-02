@@ -10,7 +10,7 @@ def new_objectid():
 
 # Client Model
 class Client(BaseModel):
-    id: Optional[str] = None  # Do not set a default value here; MongoDB will generate it
+    id: Optional[str] = Field(alias="_id")
     first_name: str
     last_name: str
     client_position: str
@@ -23,8 +23,9 @@ class Client(BaseModel):
         arbitrary_types_allowed = True
         json_encoders = {
             datetime.datetime: lambda v: v.isoformat(),
-            ObjectId: str  # Ensure ObjectIds are converted to strings
+            ObjectId: lambda v: str(v),
         }
+        allow_population_by_field_name = True
 
 
 # Prospect Model

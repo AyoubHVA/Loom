@@ -37,10 +37,13 @@ async def create_client(client: Client, clients=Depends(get_client_collection)):
     return created_client
 
 
-# list clients
+# Modify the list_clients function to convert the '_id' field to 'id' and ensure it is a string
 @app.get("/clients/", response_model=List[Client])
 async def list_clients(clients=Depends(get_client_collection)):
-    return await clients.find().to_list(100)
+    clients_list = await clients.find().to_list(100)
+    for client in clients_list:
+        client["id"] = str(client["_id"])
+    return clients_list
 
 
 @app.get("/clients/{client_id}/", response_model=Client)
