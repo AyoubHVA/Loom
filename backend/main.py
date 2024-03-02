@@ -9,6 +9,7 @@ from model import Client, Prospect
 
 app = FastAPI()
 
+
 # Root endpoint
 @app.get("/")
 async def root():
@@ -36,6 +37,7 @@ async def create_client(client: Client, clients=Depends(get_client_collection)):
     return created_client
 
 
+# list clients
 @app.get("/clients/", response_model=List[Client])
 async def list_clients(clients=Depends(get_client_collection)):
     return await clients.find().to_list(100)
