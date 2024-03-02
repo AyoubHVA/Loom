@@ -48,18 +48,8 @@ async def list_clients(clients=Depends(get_client_collection)):
     response_clients_list = []
     for client_doc in clients_list:
         # Convert ObjectId to string and create a dict for the response
-        client_dict = {
-            "id": str(client_doc["_id"]),
-            "first_name": client_doc["first_name"],
-            "last_name": client_doc["last_name"],
-            "client_position": client_doc["client_position"],
-            "company": client_doc["company"],
-            "created_at": client_doc["created_at"],
-            "additional_info": client_doc["additional_info"],
-            "sl_analytics": client_doc["sl_analytics"],
-        }
-        # Append the client dict to the response list
-        response_clients_list.append(client_dict)
+        client_doc['id'] = str(client_doc.pop('_id'))  # Transform _id to id and convert to string
+        response_clients_list.append(client_doc)  # Add the transformed doc to the response list
 
     # Return the response list
     return response_clients_list

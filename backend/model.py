@@ -36,13 +36,13 @@ class Client(BaseModel):
     sl_analytics: Dict[str, str]
 
     class Config:
+        allow_population_by_field_name = True
         arbitrary_types_allowed = True
         json_encoders = {
             datetime.datetime: lambda v: v.isoformat(),
             ObjectId: str,
             PydanticObjectId: str
         }
-        allow_population_by_field_name = True
 
 
 # Prospect Model
