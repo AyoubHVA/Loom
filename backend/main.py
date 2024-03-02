@@ -49,7 +49,8 @@ async def list_clients(clients=Depends(get_client_collection)):
     for client_doc in clients_list:
         # Convert ObjectId to string and create a dict for the response
         client_doc['id'] = str(client_doc.pop('_id'))  # Transform _id to id and convert to string
-        response_clients_list.append(client_doc)  # Add the transformed doc to the response list
+        # Now create a Client model instance for each dictionary and append to the response list
+        response_clients_list.append(Client(**client_doc))  # This line has changed
 
     # Return the response list
     return response_clients_list
