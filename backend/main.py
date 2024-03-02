@@ -48,13 +48,23 @@ async def list_clients(clients=Depends(get_client_collection)):
     return response_clients_list
 
 
-@app.get("/clients/{client_id}/", response_model=Client)
-async def get_client(client_id: str, clients=Depends(get_client_collection)):
-    _id = parse_object_id(client_id)
-    client = await clients.find_one({"_id": _id})
-    if client:
-        return client
-    raise HTTPException(status_code=404, detail="Client not found")
+@app.get("/clients/", response_model=List[Client])
+async def list_clients(clients=Depends(get_client_collection)):
+    # Fetch the clients from the database and convert them to a list
+    clients_cursor = clients.find()
+    clients_list = await clients_cursor.to_list(length=100)
+
+    # Create a new list for the response
+    response_clients_list = []
+    for client_doc in clients_list:
+        # Convert ObjectId to string and create a dict for the response
+        client_id = str(client_doc['_id'])
+        client_doc.pop('_id')  # Remove the _id field
+        client_doc['id'] = client_id  # Assign the string ID to 'id'
+        response_clients_list.append(Client(**client_doc))  # Create Client model
+
+    # Return the response list
+    return response_clients_list
 
 
 @app.post("/prospects/", response_model=Prospect)
