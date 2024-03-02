@@ -12,17 +12,17 @@ class PyObjectId(ObjectId):
     @classmethod
     def validate(cls, v):
         if not ObjectId.is_valid(v):
-            raise ValueError('Invalid ObjectId')
+            raise ValueError("Invalid objectid")
         return ObjectId(v)
 
     @classmethod
     def __modify_schema__(cls, field_schema):
-        field_schema.update(type='string')
+        field_schema.update(type="string")
 
 
 # Client Model
 class Client(BaseModel):
-    id: Optional[PyObjectId] = Field(None, alias="_id")
+    id: Optional[PyObjectId] = Field(alias="_id")
     first_name: str
     last_name: str
     client_position: str
@@ -32,11 +32,10 @@ class Client(BaseModel):
     sl_analytics: Dict[str, str]
 
     class Config:
-        allow_population_by_field_name = True
         arbitrary_types_allowed = True
         json_encoders = {
+            ObjectId: lambda v: str(v),
             datetime.datetime: lambda v: v.isoformat(),
-            ObjectId: str,
         }
 
 

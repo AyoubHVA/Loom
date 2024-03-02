@@ -52,8 +52,8 @@ async def list_clients(clients=Depends(get_client_collection)):
 async def list_clients(clients=Depends(get_client_collection)):
     clients_cursor = clients.find()
     clients_list = await clients_cursor.to_list(length=100)
-    # Use a list comprehension to convert documents to Client models
     return [Client(**client) for client in clients_list]
+
 
 
 @app.post("/prospects/", response_model=Prospect)
