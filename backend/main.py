@@ -9,7 +9,7 @@ from model import Client, Prospect
 
 app = FastAPI()
 
-
+# Root endpoint
 @app.get("/")
 async def root():
     return {"message": "Hello world"}
