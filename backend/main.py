@@ -40,10 +40,29 @@ async def create_client(client: Client, clients=Depends(get_client_collection)):
 # Modify the list_clients function to convert the '_id' field to 'id' and ensure it is a string
 @app.get("/clients/", response_model=List[Client])
 async def list_clients(clients=Depends(get_client_collection)):
-    clients_list = await clients.find().to_list(100)
-    for client in clients_list:
-        client["id"] = str(client["_id"])
-    return clients_list
+    # Fetch the clients from the database and convert them to a list
+    clients_cursor = clients.find()
+    clients_list = await clients_cursor.to_list(length=100)
+
+    # Create a new list for the response
+    response_clients_list = []
+    for client_doc in clients_list:
+        # Convert ObjectId to string and create a dict for the response
+        client_dict = {
+            "id": str(client_doc["_id"]),
+            "first_name": client_doc["first_name"],
+            "last_name": client_doc["last_name"],
+            "client_position": client_doc["client_position"],
+            "company": client_doc["company"],
+            "created_at": client_doc["created_at"],
+            "additional_info": client_doc["additional_info"],
+            "sl_analytics": client_doc["sl_analytics"],
+        }
+        # Append the client dict to the response list
+        response_clients_list.append(client_dict)
+
+    # Return the response list
+    return response_clients_list
 
 
 @app.get("/clients/{client_id}/", response_model=Client)
