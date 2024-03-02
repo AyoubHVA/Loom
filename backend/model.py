@@ -13,16 +13,12 @@ class PyObjectId(ObjectId):
     def validate(cls, v):
         if not ObjectId.is_valid(v):
             raise ValueError("Invalid objectid")
-        return ObjectId(v)
-
-    @classmethod
-    def __get_pydantic_json_schema__(cls, v):
-        return {"type": "string", "format": "objectid"}
+        return str(ObjectId(v))
 
 
 # Client Model
 class Client(BaseModel):
-    id: Optional[PyObjectId] = Field(None, alias="_id")
+    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     first_name: str
     last_name: str
     client_position: str
@@ -34,8 +30,12 @@ class Client(BaseModel):
     class Config:
         arbitrary_types_allowed = True
         json_encoders = {
-            PyObjectId: lambda v: str(v),
-            datetime.datetime: lambda v: v.isoformat(),
+            ObjectId: str
+        }
+        schema_extra = {
+            "example": {
+                "id": "507f1f77bcf86cd799439011",
+            }
         }
 
 
