@@ -55,7 +55,6 @@ async def list_clients(clients=Depends(get_client_collection)):
     return [Client(**client) for client in clients_list]
 
 
-
 @app.post("/prospects/", response_model=Prospect)
 async def create_prospect(prospect: Prospect, prospects=Depends(get_prospect_collection),
                           clients=Depends(get_client_collection)):
@@ -83,4 +82,6 @@ async def create_prospect(prospect: Prospect, prospects=Depends(get_prospect_col
 
 @app.get("/clients/{client_id}/prospects/", response_model=List[Prospect])
 async def list_prospects(client_id: str, prospects=Depends(get_prospect_collection)):
-    return await prospects.find({"client_id": client_id}).to_list(100)
+    prospect_cursor = prospects.find({"client_id": client_id})
+    prospect_list = await prospect_cursor.to_list(length=100)
+    return [Prospect(**prospect) for prospect in prospect_list]
