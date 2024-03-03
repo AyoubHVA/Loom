@@ -4,25 +4,13 @@ from bson import ObjectId
 import datetime
 
 
-class PyObjectId(ObjectId):
-    @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
-
-    @classmethod
-    def validate(cls, v):
-        if not ObjectId.is_valid(v):
-            raise ValueError("Invalid objectid")
-        return str(ObjectId(v))
-
-    @classmethod
-    def __get_pydantic_json_schema__(cls):
-        return {"type": "string", "format": "objectid"}
+def new_objectid():
+    return str(ObjectId())
 
 
 # Client Model
 class Client(BaseModel):
-    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    id: Optional[str] = None
     first_name: str
     last_name: str
     client_position: str
@@ -34,12 +22,8 @@ class Client(BaseModel):
     class Config:
         arbitrary_types_allowed = True
         json_encoders = {
-            ObjectId: str
-        }
-        schema_extra = {
-            "example": {
-                "id": "507f1f77bcf86cd799439011",
-            }
+            datetime.datetime: lambda v: v.isoformat(),
+            ObjectId: lambda v: str(v),
         }
 
 
