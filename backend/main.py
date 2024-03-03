@@ -82,6 +82,17 @@ async def create_prospect(prospect: Prospect, prospects=Depends(get_prospect_col
 
 @app.get("/clients/{client_id}/prospects/", response_model=List[Prospect])
 async def list_prospects(client_id: str, prospects=Depends(get_prospect_collection)):
-    prospect_cursor = prospects.find({"client_id": client_id})
-    prospect_list = await prospect_cursor.to_list(length=100)
-    return [Prospect(**prospect) for prospect in prospect_list]
+    # Fetch the prospects from the database
+    prospects_cursor = prospects.find({"client_id": client_id})
+    prospects_list = await prospects_cursor.to_list(length=100)
+
+    # Transform the documents before returning
+    transformed_prospects = []
+    for prospect_doc in prospects_list:
+        # Convert ObjectId to string and create a dict for the response
+        prospect_doc['id'] = str(prospect_doc.pop('_id', None))  # Transform _id to id and ensure it's a string
+        transformed_prospects.append(prospect_doc)  # Add the transformed doc to the response list
+
+    # Return the transformed list of prospects
+    return transformed_prospects
+
