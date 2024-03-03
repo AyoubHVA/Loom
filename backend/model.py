@@ -15,6 +15,10 @@ class PyObjectId(ObjectId):
             raise ValueError("Invalid objectid")
         return str(ObjectId(v))
 
+    @classmethod
+    def __get_pydantic_json_schema__(cls):
+        return {"type": "string", "format": "objectid"}
+
 
 # Client Model
 class Client(BaseModel):
