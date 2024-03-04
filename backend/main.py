@@ -4,8 +4,18 @@ from bson.errors import InvalidId
 from fastapi import FastAPI, HTTPException, Depends
 from database import get_client_collection, get_prospect_collection
 from model import Client, Prospect
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/")

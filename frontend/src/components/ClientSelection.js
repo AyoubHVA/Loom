@@ -1,45 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-function ClientSelection() {
+const ClientSelection = ({ onClientSelect }) => {
   const [clients, setClients] = useState([]);
-  const [selectedClient, setSelectedClient] = useState(null);
+  const [selectedClientId, setSelectedClientId] = useState('');
 
-  useEffect(() => {
-    fetchClients();
-  }, []);
-
+ useEffect(() => {
   const fetchClients = async () => {
     try {
-      const response = await axios.get('/clients');
+      const response = await axios.get('http://35.87.3.64:8000/clients/');
+      console.log('Clients fetched:', response.data); // Log the response data
       setClients(response.data);
     } catch (error) {
       console.error('Error fetching clients:', error);
     }
   };
 
-  const handleClientChange = (event) => {
-    setSelectedClient(event.target.value);
+    fetchClients().then(r => console.log(r));
+  }, []);
+
+  const handleClientChange = (e) => {
+    const clientId = e.target.value;
+    setSelectedClientId(clientId);
+    onClientSelect(clientId);
   };
 
   return (
-    <div>
-      <h2>Client Selection</h2>
-      <select value={selectedClient} onChange={handleClientChange}>
-        <option value="">Select a client</option>
-        {clients.map((client) => (
-          <option key={client.id} value={client.id}>
-            {client.name}
-          </option>
-        ))}
-      </select>
-      {selectedClient && (
-        <div>
-          <p>Selected Client: {selectedClient}</p>
-        </div>
-      )}
-    </div>
+    <select value={selectedClientId} onChange={handleClientChange}>
+      <option value="">Select a Client</option>
+      {clients.map((client) => (
+        <option key={client.id} value={client.id}>
+          {client.first_name} {client.last_name}
+        </option>
+      ))}
+    </select>
   );
-}
+};
 
 export default ClientSelection;

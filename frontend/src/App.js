@@ -1,13 +1,21 @@
-import { BrowserRouter as Router, Route } from 'react-router-dom';
-import ProspectListPage from './components/ProspectListPage';
-import ProspectLandingPage from './components/ProspectLandingPage';
+import React, { useState } from 'react';
+import ClientSelection from "./components/ClientSelection";
 
 function App() {
+  const [selectedClientId, setSelectedClientId] = useState('');
+
+  const handleClientSelect = (clientId) => {
+    setSelectedClientId(clientId);
+    console.log(`Selected client ID: ${clientId}`);
+    // Here you can make further API calls to fetch the client's details or prospects
+  };
+
   return (
-    <Router>
-      <Route path="/prospects" component={ProspectListPage} />
-      <Route path="/video/:prospectId" component={ProspectLandingPage} />
-    </Router>
+    <div className="App">
+      <h1>Select a Client</h1>
+      <ClientSelection onClientSelect={handleClientSelect} />
+      {/* You can add more components here that will use the selectedClientId */}
+    </div>
   );
 }
 
