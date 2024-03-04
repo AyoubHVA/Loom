@@ -11,9 +11,9 @@ app = FastAPI()
 
 
 # Root endpoint
-@app.get("/docs")
+@app.get("/")
 async def root():
-    return
+    return {"message": "Hello world"}
 
 
 def parse_object_id(str_id: str) -> ObjectId:
