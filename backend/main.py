@@ -105,3 +105,5 @@ async def update_prospect_loom_url(prospect_id: str, loom_video_url: str, prospe
     if update_result.modified_count == 1:
         updated_prospect = await prospects.find_one({"_id": ObjectId(prospect_id)})
         return updated_prospect
+    else:
+        raise HTTPException(status_code=404, detail=f"Prospect {prospect_id} not found")
