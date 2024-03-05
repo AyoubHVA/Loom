@@ -5,16 +5,17 @@ const ClientSelection = ({ onClientSelect }) => {
   const [clients, setClients] = useState([]);
   const [selectedClientId, setSelectedClientId] = useState('');
 
- useEffect(() => {
-  const fetchClients = async () => {
-    try {
-      const response = await axios.get('http://35.87.3.64:8000/clients/');
-      console.log('Clients fetched:', response.data); // Log the response data
-      setClients(response.data);
-    } catch (error) {
-      console.error('Error fetching clients:', error);
-    }
-  };
+  useEffect(() => {
+    // Fetch clients from backend
+    const fetchClients = async () => {
+      try {
+        // Adjust the URL to match your API endpoint for fetching clients
+        const response = await axios.get('https://api.jamairo.buzz/clients/');
+        setClients(response.data); // Assuming the response is the array of clients
+      } catch (error) {
+        console.error('Error fetching clients:', error);
+      }
+    };
 
     fetchClients().then(r => console.log(r));
   }, []);

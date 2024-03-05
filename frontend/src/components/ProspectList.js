@@ -1,30 +1,31 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const ProspectList = ({ clientId }) => {
   const [prospects, setProspects] = useState([]);
 
   useEffect(() => {
+    // Fetch prospects for the selected client
+    const fetchProspects = async () => {
+      try {
+        const response = await axios.get(`https://api.jamairo.buzz/clients/${clientId}/prospects/`);
+        setProspects(response.data); // Assuming the response is the array of prospects
+      } catch (error) {
+        console.error('Error fetching prospects:', error);
+      }
+    };
+
     if (clientId) {
-      const fetchProspects = async () => {
-        const response = await fetch(`/clients/${clientId}/prospects/`);
-        const data = await response.json();
-        setProspects(data);
-      };
-
-      fetchProspects();
+      fetchProspects().then(r => console.log(r));
     }
-  }, [clientId]);
-
-  if (!clientId) {
-    return <p>Please select a client to view their prospects.</p>;
-  }
+  }, [clientId]); // This effect runs when clientId changes
 
   return (
     <ul>
       {prospects.map((prospect) => (
         <li key={prospect.id}>
-          {prospect.first_name} from {prospect.company_name}
-          {/* Implement navigation to prospect's page or additional functionality here */}
+          {prospect.first_name} - {prospect.company_name}
+          {/* Display prospect details here */}
         </li>
       ))}
     </ul>
