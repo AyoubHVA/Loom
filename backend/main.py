@@ -94,3 +94,16 @@ async def list_prospects(client_id: str, prospects=Depends(get_prospect_collecti
         transformed_prospects.append(prospect_doc)
 
     return transformed_prospects
+
+
+@app.patch("/prospects/{prospect_id}/", response_model=Prospect)
+async def update_prospect_loom_url(prospect_id: str, loom_video_url: str, prospects=Depends(get_prospect_collection)):
+    update_result = await prospects.update_one(
+        {"_id": ObjectId(prospect_id)},
+        {"$set": {"loom_video_url": loom_video_url}}
+    )
+    if update_result.modified_count == 1:
+        updated_prospect = await prospects.find_one({"_id": ObjectId(prospect_id)})
+        return updated_prospect
+    else:
+        raise HTTPException(status_code=404, detail=f"Prospect {prospect_id} not found")

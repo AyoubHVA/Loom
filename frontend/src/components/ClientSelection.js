@@ -9,9 +9,8 @@ const ClientSelection = ({ onClientSelect }) => {
     // Fetch clients from backend
     const fetchClients = async () => {
       try {
-        // Adjust the URL to match your API endpoint for fetching clients
         const response = await axios.get('https://api.jamairo.buzz/clients/');
-        setClients(response.data); // Assuming the response is the array of clients
+        setClients(response.data);
       } catch (error) {
         console.error('Error fetching clients:', error);
       }
