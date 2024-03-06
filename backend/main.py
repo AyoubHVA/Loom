@@ -98,7 +98,6 @@ async def list_prospects(client_id: str, prospects=Depends(get_prospect_collecti
 
 @app.patch("/prospects/{prospect_id}/", response_model=Prospect)
 async def update_prospect_loom_url(prospect_id: str, loom_video_url: str, prospects=Depends(get_prospect_collection)):
-    # Validate the loom_video_url before updating...
 
     update_result = await prospects.update_one(
         {"_id": ObjectId(prospect_id)},
@@ -106,15 +105,14 @@ async def update_prospect_loom_url(prospect_id: str, loom_video_url: str, prospe
     )
 
     if update_result.modified_count == 0:
-        raise HTTPException(status_code=404, detail=f"Prospect {prospect_id} not found or Loom URL unchanged")
+        raise HTTPException(status_code=404, detail=f"Prospect {prospect_id} Loom URL is unchanged")
 
     updated_prospect = await prospects.find_one({"_id": ObjectId(prospect_id)})
 
     if updated_prospect is None:
         raise HTTPException(status_code=404, detail=f"Prospect {prospect_id} not found")
 
-    # Convert ObjectId to string for the ID
     updated_prospect["id"] = str(updated_prospect["_id"])
-    del updated_prospect["_id"]  # Remove the original _id field
+    del updated_prospect["_id"]
 
     return updated_prospect
