@@ -19,6 +19,7 @@ function App() {
     setSelectedProspectIdentifier(prospectIdentifier);
   };
 
+  console.log(ClientSelection, ProspectList, ProspectLandingPage);
   return (
     <div className="App">
       <h1>Select a Client</h1>
