@@ -106,4 +106,5 @@ async def update_prospect_loom_url(prospect_id: str, loom_video_url: str, prospe
         updated_prospect = await prospects.find_one({"_id": ObjectId(prospect_id)})
         return updated_prospect
     else:
-        raise HTTPException(status_code=404, detail=f"Prospect {prospect_id} not found")
+        raise HTTPException(status_code=404, detail=f"Prospect {prospect_id} already has the provided Loom URL")
+    # TODO: make sure it only accepts a valid Loom URL
