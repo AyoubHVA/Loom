@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { fetchProspectData, updateProspectLoomUrl } from '../data/data';
+import React, {useState, useEffect} from 'react';
+import {useParams} from 'react-router-dom';
+import {fetchProspectData, updateProspectLoomUrl} from '../data/data';
 import LoomUrlModal from "../modals/LoomUrlModal";
 
 const ProspectLandingPage = () => {
-    const { prospectIdentifier } = useParams();
+    const {prospectIdentifier} = useParams();
     const [prospect, setProspect] = useState(null);
     const [loomUrl, setLoomUrl] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
