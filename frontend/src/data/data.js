@@ -2,9 +2,9 @@
 const API_BASE_URL = 'https://api.jamairo.buzz';
 
 // Fetch the prospect data based on the identifier
-export const fetchProspectData = async (prospectIdentifier) => {
+export const fetchProspectData = async (prospectId) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/prospects/${prospectIdentifier}`);
+    const response = await fetch(`${API_BASE_URL}/prospects/${prospectId}`);
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
@@ -16,9 +16,9 @@ export const fetchProspectData = async (prospectIdentifier) => {
 };
 
 // Update the Loom video URL for a given prospect
-export const updateProspectLoomUrl = async (prospectIdentifier, loomVideoUrl) => {
+export const updateProspectLoomUrl = async (prospectId, loomVideoUrl) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/prospects/${prospectIdentifier}`, {
+    const response = await fetch(`${API_BASE_URL}/prospects/${prospectId}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
