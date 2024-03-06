@@ -1,39 +1,43 @@
-import React, {useState, useEffect} from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
 
+function ProspectList({ clientId }) {
+  const [prospects, setProspects] = useState([]);
+  const history = useHistory();
 
-const ProspectList = ({clientId, onProspectSelect}) => {
-    const [prospects, setProspects] = useState([]);
+  useEffect(() => {
+    fetchProspects();
+  }, [clientId]);
 
-
-    useEffect(() => {
-        // Fetch prospects for the selected client
-        const fetchProspects = async () => {
-            try {
-                const response = await axios.get(`https://api.jamairo.buzz/clients/${clientId}/prospects/`);
-                setProspects(response.data);
-            } catch (error) {
-                console.error('Error fetching prospects:', error);
-            }
-        };
-        if (clientId) {
-            fetchProspects().then(r => console.log(r));
-        }
-    }, [clientId]); // This effect runs when clientId changes
-
-    const handleProspectClick = (prospectId) => {
-        onProspectSelect(prospectId);
+  const fetchProspects = async () => {
+    try {
+      const response = await fetch(`https://api.jamairo.buzz/clients/${clientId}/prospects`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch prospects');
+      }
+      const data = await response.json();
+      setProspects(data);
+    } catch (error) {
+      console.error('Error fetching prospects:', error);
     }
+  };
 
-    return (
-        <li>
-            {prospects.map(prospect => (
-                <li key={prospect.id} onClick={() => handleProspectClick(prospect.id)}>
-                    {prospect.first_name}
-                </li>
-            ))}
-        </li>
-    );
-};
+  const handleProspectClick = (prospectId) => {
+    history.push(`/prospect/${prospectId}`);
+  };
+
+  return (
+    <div>
+      <h2>Prospects</h2>
+      <ul>
+        {prospects.map((prospect) => (
+          <li key={prospect.id} onClick={() => handleProspectClick(prospect.id)} style={{ cursor: 'pointer' }}>
+            {prospect.first_name} - {prospect.company_name}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 export default ProspectList;

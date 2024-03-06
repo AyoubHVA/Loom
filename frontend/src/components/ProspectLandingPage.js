@@ -1,57 +1,84 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { fetchProspectData, updateProspectLoomUrl } from '../data/data';
 
-const ProspectLandingPage = () => {
-  const { prospectIdentifier } = useParams();
+function ProspectLandingPage() {
+  const { prospectId } = useParams();
+  const [videoUrl, setVideoUrl] = useState('');
   const [prospect, setProspect] = useState(null);
-  const [loomUrl, setLoomUrl] = useState('');
 
-  // Fetch the prospect data when the component mounts
-  useEffect(() => {
-    fetchProspectData(prospectIdentifier).then(data => {
-      setProspect(data);
-      if (data && data.loom_video_url) {
-        setLoomUrl(data.loom_video_url);
-      }
-    });
-  }, [prospectIdentifier]);
-
-  const handleLoomUrlSubmit = async (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    const updatedProspect = await updateProspectLoomUrl(prospectIdentifier, loomUrl);
-    setProspect(updatedProspect);
+    try {
+      const response = await fetch(`https://api.jamairo.buzz/prospects/${prospectId}/`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ loom_video_url: videoUrl }),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to update Loom video URL');
+      }
+      // Refresh prospect data after successful update
+      fetchProspect();
+    } catch (error) {
+      console.error('Error updating Loom video URL:', error);
+    }
+  };
+
+  const fetchProspect = async () => {
+    try {
+      const response = await fetch(`https://api.jamairo.buzz/prospects/${prospectId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch prospect');
+      }
+      const data = await response.json();
+      setProspect(data);
+    } catch (error) {
+      console.error('Error fetching prospect:', error);
+    }
+  };
+
+  const handleVideoUrlChange = (event) => {
+    setVideoUrl(event.target.value);
   };
 
   return (
     <div>
+      <h2>Prospect Landing Page</h2>
       {prospect && (
-        <>
-          <h1>{prospect.first_name}'s Landing Page</h1>
-          <form onSubmit={handleLoomUrlSubmit}>
+        <div>
+          <h3>Prospect Info</h3>
+          <p>First Name: {prospect.first_name}</p>
+          <p>Company Name: {prospect.company_name}</p>
+          <p>Loom Video URL: {prospect.loom_video_url}</p>
+          <form onSubmit={handleSubmit}>
+            <label htmlFor="videoUrlInput">Enter Loom Video URL:</label>
             <input
               type="text"
-              value={loomUrl}
-              onChange={(e) => setLoomUrl(e.target.value)}
-              placeholder="Enter the Loom video URL"
+              id="videoUrlInput"
+              value={videoUrl}
+              onChange={handleVideoUrlChange}
+              required
             />
-            <button type="submit">Save Loom Video</button>
+            <button type="submit">Submit</button>
           </form>
-          {/* Display the loom video if the URL is present */}
           {prospect.loom_video_url && (
-            <iframe
-              src={prospect.loom_video_url}
-              webkitallowfullscreen="true"
-              mozallowfullscreen="true"
-              allowFullScreen
-              title="Loom Video"
-              style={{ width: '100%', height: '360px' }}
-            ></iframe>
+            <div>
+              <h3>Loom Video</h3>
+              <iframe
+                title="Loom Video"
+                width="560"
+                height="315"
+                src={prospect.loom_video_url}
+                allowFullScreen
+              ></iframe>
+            </div>
           )}
-        </>
+        </div>
       )}
     </div>
   );
-};
+}
 
 export default ProspectLandingPage;

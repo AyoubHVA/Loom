@@ -1,39 +1,26 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import ClientSelection from './components/ClientSelection';
 import ProspectList from './components/ProspectList';
 import ProspectLandingPage from './components/ProspectLandingPage';
 
 function App() {
-  const [selectedClientId, setSelectedClientId] = useState('');
-  const [selectedProspectIdentifier, setSelectedProspectIdentifier] = useState('');
-
-  // Handle client selection
-  const handleClientSelect = (clientId) => {
-    setSelectedClientId(clientId);
-    // Reset the selected prospect when a new client is selected
-    setSelectedProspectIdentifier('');
-  };
-
-  // Handle prospect selection
-  const handleProspectSelect = (prospectIdentifier) => {
-    setSelectedProspectIdentifier(prospectIdentifier);
-  };
-
-  console.log(ClientSelection, ProspectList, ProspectLandingPage);
   return (
-    <div className="App">
-      <h1>Select a Client</h1>
-      <ClientSelection onClientSelect={handleClientSelect} />
-      {selectedClientId && (
-        <ProspectList
-          clientId={selectedClientId}
-          onProspectSelect={handleProspectSelect}
-        />
-      )}
-      {selectedProspectIdentifier && (
-        <ProspectLandingPage prospectIdentifier={selectedProspectIdentifier} />
-      )}
-    </div>
+    <Router>
+      <div>
+        <Routes>
+          <Route path="/" exact>
+            <ClientSelection />
+          </Route>
+          <Route path="/prospects/:clientId" exact render={({ match }) => (
+            <ProspectList clientId={match.params.clientId} />
+          )} />
+          <Route path="/prospect/:prospectId" exact render={({ match }) => (
+            <ProspectLandingPage prospectId={match.params.prospectId} />
+          )} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
