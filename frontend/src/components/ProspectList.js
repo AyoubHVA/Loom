@@ -20,7 +20,6 @@ const ProspectList = ({clientId, onProspectSelect, setIsModalOpen}) => {
         }
     };
 
-
     return (
         <ul>
             {prospects.map(prospect => (

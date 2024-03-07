@@ -16,8 +16,8 @@ function App() {
 
     // Handle prospect selection
     const handleProspectSelect = (prospectId) => {
+        console.log(`Prospect selected: ${prospectId}`);
         setSelectedProspectId(prospectId);
-        // Set the state to open the modal here or inside ProspectList
         setIsModalOpen(true);
     };
 
