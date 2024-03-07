@@ -1,6 +1,6 @@
 // ProspectList.js
 import React, { useEffect, useState } from 'react';
-import { fetchProspectsByClientId } from '../api/clientsApi';
+import { fetchProspectsByClientId } from '../api/ClientsApi';
 
 const ProspectList = ({ clientId, onProspectSelect }) => {
     const [prospects, setProspects] = useState([]);
