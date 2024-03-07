@@ -1,31 +1,41 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-const ProspectList = ({ clientId, onProspectSelect, setIsModalOpen }) => {
-  const [prospects, setProspects] = useState([]);
+const ClientSelection = ({ onClientSelect }) => {
+  const [clients, setClients] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (clientId) {
-      axios.get(`https://api.jamairo.buzz/clients/${clientId}/prospects/`)
-        .then(response => setProspects(response.data))
-        .catch(error => console.error('Error fetching prospects:', error));
-    }
-  }, [clientId]);
+    setLoading(true);
+    axios.get('https://api.jamairo.buzz/clients/')
+      .then((response) => {
+        setClients(response.data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error('Error fetching clients:', error);
+        setLoading(false);
+      });
+  }, []);
 
-  const handleProspectClick = (prospectId) => {
-    onProspectSelect(prospectId);
-    setIsModalOpen(true); // This will open the modal when a prospect is clicked
+  const handleClientChange = (e) => {
+    const selectedId = e.target.value;
+    onClientSelect(selectedId);
   };
 
   return (
-    <ul>
-      {prospects.map(prospect => (
-        <li key={prospect.id} onClick={() => handleProspectClick(prospect.id)}>
-          {prospect.first_name} - {prospect.company_name}
-        </li>
-      ))}
-    </ul>
+    <div>
+      <label htmlFor="client-select">Select a Client:</label>
+      <select id="client-select" onChange={handleClientChange} disabled={loading}>
+        <option value="">--Please choose an option--</option>
+        {clients.map(client => (
+          <option key={client.id} value={client.id}>
+            {client.first_name} {client.last_name}
+          </option>
+        ))}
+      </select>
+    </div>
   );
 };
 
-export default ProspectList;
+export default ClientSelection;
