@@ -1,7 +1,7 @@
 // ProspectLandingPage.js
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { fetchProspectData, updateProspectLoomUrl } from '../api/clientsApi';
+import { fetchProspectData, updateProspectLoomUrl } from '../api/ClientsApi';
 import LoomUrlModal from "../modals/LoomUrlModal";
 
 const ProspectLandingPage = () => {
