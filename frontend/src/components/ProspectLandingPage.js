@@ -22,14 +22,23 @@ const ProspectLandingPage = () => {
     }
   }, [prospectId]);
 
-  const handleLoomUrlSubmit = async (newUrl) => {
+  const handleLoomUrlSubmit = async (submittedUrl) => {
     try {
-      const updatedProspect = await updateProspectLoomUrl(prospectId, newUrl);
+      const updatedProspect = await updateProspectLoomUrl(prospectId, submittedUrl);
       setProspect(updatedProspect);
+      setLoomUrl(updatedProspect.loom_video_url || '');
       setIsModalOpen(false);
     } catch (error) {
       console.error('Error updating prospect loom URL:', error);
     }
+  };
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
   };
 
   return (
@@ -50,14 +59,17 @@ const ProspectLandingPage = () => {
               />
             </div>
           ) : (
-            <button onClick={() => setIsModalOpen(true)}>Add Loom Video</button>
+            <button onClick={handleOpenModal}>Add Loom Video</button>
           )}
-          <LoomUrlModal
-            isOpen={isModalOpen}
-            loomUrl={loomUrl}
-            onSubmit={handleLoomUrlSubmit}
-            onCancel={() => setIsModalOpen(false)}
-          />
+          {isModalOpen && (
+            <LoomUrlModal
+              isOpen={isModalOpen}
+              loomUrl={loomUrl}
+              setLoomUrl={setLoomUrl}
+              onSubmit={handleLoomUrlSubmit}
+              onCancel={handleCloseModal}
+            />
+          )}
         </div>
       )}
     </div>
