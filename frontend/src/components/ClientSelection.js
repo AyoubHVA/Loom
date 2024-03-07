@@ -1,44 +1,41 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 
-function ClientDropdown() {
+const ClientSelection = ({ onClientSelect }) => {
   const [clients, setClients] = useState([]);
-  const [selectedClient, setSelectedClient] = useState('');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetchClients().then(r => console.log(r));
+    setLoading(true);
+    axios.get('https://api.jamairo.buzz/clients/')
+      .then((response) => {
+        setClients(response.data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error('Error fetching clients:', error);
+        setLoading(false);
+      });
   }, []);
 
-  const fetchClients = async () => {
-    try {
-      const response = await fetch('https://api.jamairo.buzz/clients');
-      if (!response.ok) {
-        throw new Error('Failed to fetch clients');
-      }
-      const data = await response.json();
-      setClients(data);
-    } catch (error) {
-      console.error('Error fetching clients:', error);
-    }
-  };
-
-  const handleChange = (event) => {
-    setSelectedClient(event.target.value);
+  const handleClientChange = (e) => {
+    const selectedId = e.target.value;
+    onClientSelect(selectedId);
   };
 
   return (
     <div>
-      <label htmlFor="clientSelect">Select a client:</label>
-      <select id="clientSelect" value={selectedClient} onChange={handleChange}>
-        <option value="">Select a client</option>
-        {clients.map((client) => (
+      <label htmlFor="client-select">Select a Client:</label>
+      <select id="client-select" onChange={handleClientChange} disabled={loading}>
+        <option value="">--Please choose an option--</option>
+        {clients.map(client => (
           <option key={client.id} value={client.id}>
-            {client.first_name} {client.last_name} - {client.company}
+            {client.first_name} {client.last_name}
           </option>
         ))}
       </select>
-      {selectedClient && <p>Selected Client ID: {selectedClient}</p>}
     </div>
   );
-}
+};
 
-export default ClientDropdown;
+export default ClientSelection;

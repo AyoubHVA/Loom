@@ -1,33 +1,49 @@
-import React, {useState, useEffect} from 'react';
+// LoomUrlModal.js
+import React, { useState } from 'react';
 
-const LoomUrlModal = ({isOpen, onClose, onSubmit}) => {
-    const [url, setUrl] = useState('');
+const LoomUrlModal = ({ isOpen, onClose, onSubmit }) => {
+  const [loomUrl, setLoomUrl] = useState('');
 
-    if (!isOpen) {
-        return null;
-    }
+  if (!isOpen) return null;
 
-    return (
-        <div style={{
-            position: 'fixed',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            backgroundColor: 'white',
-            padding: '20px',
-            zIndex: 1000
-        }}>
-            <h2>Enter Loom Video URL</h2>
-            <input
-                type="text"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                style={{width: '100%'}}
-            />
-            <button onClick={() => onSubmit(url)}>Submit</button>
-            <button onClick={onClose}>Close</button>
-        </div>
-    );
+  return (
+    <div className="modal">
+      <div className="modal-content">
+        <h2>Enter Loom Video URL</h2>
+        <input
+          type="text"
+          value={loomUrl}
+          onChange={(e) => setLoomUrl(e.target.value)}
+          placeholder="https://www.loom.com/share/..."
+        />
+        <button onClick={() => onSubmit(loomUrl)}>Submit</button>
+        <button onClick={onClose}>Close</button>
+      </div>
+      <style jsx>{`
+        .modal {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0, 0, 0, 0.5);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+        .modal-content {
+          background-color: #fff;
+          padding: 20px;
+          border-radius: 5px;
+        }
+        input {
+          display: block;
+          margin-bottom: 20px;
+          width: 100%;
+        }
+      `}</style>
+    </div>
+  );
 };
 
 export default LoomUrlModal;
