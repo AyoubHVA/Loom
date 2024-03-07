@@ -4,6 +4,8 @@ import React, {useState} from 'react';
 const LoomUrlModal = ({isOpen, onClose, onSubmit}) => {
     const [loomUrl, setLoomUrl] = useState('');
 
+    console.log('isOpen', isOpen);
+
     if (!isOpen) return null;
 
     return (
