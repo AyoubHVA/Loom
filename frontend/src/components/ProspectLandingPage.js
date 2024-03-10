@@ -6,20 +6,24 @@ const ProspectLandingPage = ({ prospectId, isModalOpen, setIsModalOpen }) => {
   const [prospect, setProspect] = useState(null);
   const [loomUrl, setLoomUrl] = useState('');
 
-  useEffect(() => {
-     console.log(`Prospect ID received: ${prospectId}`); // This line should log the prospect ID
+ useEffect(() => {
+    console.log(`Prospect ID received: ${prospectId}`);
     const getProspectData = async () => {
       try {
         const data = await fetchProspectData(prospectId);
-        setProspect(data);
-        setLoomUrl(data.loom_video_url || '');
+        if (data) { // Check if data is not undefined
+          setProspect(data);
+          setLoomUrl(data.loom_video_url || '');
+        } else {
+          console.log('No prospect data returned from the API');
+        }
       } catch (error) {
         console.error('Error fetching prospect data:', error);
       }
     };
 
     if (prospectId) {
-      getProspectData().then(r => console.log(r));
+      getProspectData().then(r => console.log('Prospect data fetched:', r));
     }
   }, [prospectId]);
 
