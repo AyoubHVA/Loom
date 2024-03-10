@@ -8,13 +8,19 @@ function App() {
   const [selectedProspectId, setSelectedProspectId] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  console.log(`Selected Client ID: ${selectedClientId}`);
+  console.log(`Selected Prospect ID: ${selectedProspectId}`);
+  console.log(`Is Modal Open: ${isModalOpen}`);
+
   const handleClientSelect = (clientId) => {
+    console.log(`Client selected: ${clientId}`);
     setSelectedClientId(clientId);
   };
 
   const handleProspectSelect = (prospectId) => {
+    console.log(`Prospect selected: ${prospectId}`);
     setSelectedProspectId(prospectId);
-    setIsModalOpen(true); // This line should trigger the modal to open
+    setIsModalOpen(true);
   };
 
   return (

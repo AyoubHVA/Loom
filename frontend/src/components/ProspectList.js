@@ -1,23 +1,25 @@
-// ProspectList.js
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Use `useHistory` hook for navigation
 
-const ProspectList = ({ clientId }) => {
+const ProspectList = ({ clientId, onProspectSelect }) => {
   const [prospects, setProspects] = useState([]);
-  const navigate = useNavigate(); // Get the history object
+
+  console.log(`Fetching prospects for client ID: ${clientId}`);
 
   useEffect(() => {
     if (clientId) {
       axios.get(`https://api.jamairo.buzz/clients/${clientId}/prospects/`)
-        .then(response => setProspects(response.data))
+        .then(response => {
+          console.log('Prospects fetched:', response.data);
+          setProspects(response.data);
+        })
         .catch(error => console.error('Error fetching prospects:', error));
     }
   }, [clientId]);
 
   const handleProspectClick = (prospectId) => {
-    // Navigate to the ProspectLandingPage for the selected prospect
-    navigate(`/prospects/${prospectId}`);
+    console.log(`Prospect clicked: ${prospectId}`);
+    onProspectSelect(prospectId);
   };
 
   return (
