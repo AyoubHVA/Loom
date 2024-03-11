@@ -97,17 +97,26 @@ async def list_prospects(client_id: str, prospects=Depends(get_prospect_collecti
 
 
 @app.patch("/prospects/{prospect_id}/", response_model=Prospect)
-async def update_prospect_loom_url(prospect_id: str, loom_video_url: str, prospects=Depends(get_prospect_collection)):
+async def update_prospect_loom_url(
+        prospect_id: str,
+        prospect_update: Prospect,
+        prospects=Depends(get_prospect_collection)
+):
+    update_data = prospect_update.dict(exclude_unset=True)
+    loom_video_url = update_data.get("loom_video_url", None)
+
+    if loom_video_url is None:
+        raise HTTPException(status_code=400, detail="No loom_video_url provided")
+
     update_result = await prospects.update_one(
         {"_id": ObjectId(prospect_id)},
         {"$set": {"loom_video_url": loom_video_url}}
     )
 
     if update_result.modified_count == 0:
-        raise HTTPException(status_code=404, detail=f"Prospect {prospect_id} Loom URL is unchanged")
+        raise HTTPException(status_code=404, detail=f"Prospect {prospect_id} not found or Loom URL is unchanged")
 
     updated_prospect = await prospects.find_one({"_id": ObjectId(prospect_id)})
-
     if updated_prospect is None:
         raise HTTPException(status_code=404, detail=f"Prospect {prospect_id} not found")
 
@@ -127,4 +136,3 @@ async def get_prospect(prospect_id: str, prospects=Depends(get_prospect_collecti
         del prospect["_id"]  # Convert the '_id' field from ObjectId to string and remove it
         return prospect
     raise HTTPException(status_code=404, detail="Prospect not found")
-
