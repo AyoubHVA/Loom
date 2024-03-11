@@ -40,9 +40,10 @@ const LoomUrlModal = ({isOpen, onClose, onSubmit}) => {
                 }
 
                 .modal-content {
-                    background-color: #000000;
+                    background-color: #ffffff;
                     padding: 20px;
                     border-radius: 5px;
+                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
                 }
 
                 input {
