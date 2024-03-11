@@ -1,21 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { fetchProspectData, updateProspectLoomUrl } from '../api/ClientsApi';
 import LoomUrlModal from '../modals/LoomUrlModal';
+import { oembed } from '@loomhq/loom-embed';
 
 const ProspectLandingPage = ({ prospectId, isModalOpen, setIsModalOpen }) => {
   const [prospect, setProspect] = useState(null);
-  const [loomUrl, setLoomUrl] = useState('');
+  const [loomHtml, setLoomHtml] = useState('');
 
- useEffect(() => {
-    console.log(`Prospect ID received: ${prospectId}`);
+  useEffect(() => {
     const getProspectData = async () => {
       try {
         const data = await fetchProspectData(prospectId);
-        if (data) { // Check if data is not undefined
+        if (data && data.loom_video_url) {
           setProspect(data);
-          setLoomUrl(data.loom_video_url || '');
+          const { html } = await oembed(data.loom_video_url);
+          setLoomHtml(html);
         } else {
-          console.log('No prospect data returned from the API');
+          console.error('No prospect data or Loom URL found.');
         }
       } catch (error) {
         console.error('Error fetching prospect data:', error);
@@ -23,16 +24,18 @@ const ProspectLandingPage = ({ prospectId, isModalOpen, setIsModalOpen }) => {
     };
 
     if (prospectId) {
-        console.log(`Attempting to fetch prospect data for ID: ${prospectId}`);
-      getProspectData().then(r => console.log('Prospect data fetched:', r));
+      getProspectData();
     }
   }, [prospectId]);
 
   const handleLoomUrlSubmit = async (newUrl) => {
-       console.log(`Submitting new Loom URL: ${newUrl} for prospect ID: ${prospectId}`);
     try {
       const updatedProspect = await updateProspectLoomUrl(prospectId, newUrl);
-      setProspect(updatedProspect);
+      if (updatedProspect && updatedProspect.loom_video_url) {
+        setProspect(updatedProspect);
+        const { html } = await oembed(updatedProspect.loom_video_url);
+        setLoomHtml(html);
+      }
       setIsModalOpen(false);
     } catch (error) {
       console.error('Error updating prospect loom URL:', error);
@@ -45,19 +48,10 @@ const ProspectLandingPage = ({ prospectId, isModalOpen, setIsModalOpen }) => {
         <div>
           <h1>{prospect.first_name}'s Landing Page</h1>
           <p>Company: {prospect.company_name}</p>
-          {prospect.loom_video_url ? (
-            <iframe
-              src={prospect.loom_video_url}
-              title="Loom Video"
-              allowFullScreen
-              style={{ width: '100%', height: '400px' }} // Adjust size as needed
-            />
-          ) : (
-            <button onClick={() => setIsModalOpen(true)}>Add Loom Video</button>
-          )}
+          <div dangerouslySetInnerHTML={{ __html: loomHtml }} />
           <LoomUrlModal
             isOpen={isModalOpen}
-            loomUrl={loomUrl}
+            loomUrl={prospect.loom_video_url || ''}
             onSubmit={handleLoomUrlSubmit}
             onCancel={() => setIsModalOpen(false)}
           />

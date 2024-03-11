@@ -4,14 +4,10 @@ import React, {useState} from 'react';
 const LoomUrlModal = ({isOpen, onClose, onSubmit}) => {
     const [loomUrl, setLoomUrl] = useState('');
 
-    console.log('isOpen', isOpen);
 
     if (!isOpen) {
-        console.log('Modal is closed.');
         return null;
     }
-
-    console.log("rendering modal")
 
     return (
         <div className="modal">
