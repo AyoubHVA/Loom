@@ -26,21 +26,21 @@ const LoomUrlModal = ({isOpen, onClose, onSubmit}) => {
                 <button onClick={() => onSubmit(loomUrl)}>Submit</button>
                 <button onClick={onClose}>Close</button>
             </div>
-            <style>{`
+            <style jsx>{`
                 .modal {
                     position: fixed;
                     top: 0;
                     left: 0;
                     width: 100%;
                     height: 100%;
-                    background-color: rgb(185, 28, 28);
+                    background-color: rgb(255, 255, 255);
                     display: flex;
                     justify-content: center;
                     align-items: center;
                 }
 
                 .modal-content {
-                    background-color: #e8bd5a;
+                    background-color: #000000;
                     padding: 20px;
                     border-radius: 5px;
                 }
