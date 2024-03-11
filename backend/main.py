@@ -5,8 +5,14 @@ from fastapi import FastAPI, HTTPException, Depends
 from database import get_client_collection, get_prospect_collection
 from model import Client, Prospect
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
 app = FastAPI()
+
+
+class LoomUrlUpdate(BaseModel):
+    loom_video_url: str
+
 
 origins = [
     "http://localhost:8000",
@@ -99,18 +105,12 @@ async def list_prospects(client_id: str, prospects=Depends(get_prospect_collecti
 @app.patch("/prospects/{prospect_id}/", response_model=Prospect)
 async def update_prospect_loom_url(
         prospect_id: str,
-        prospect_update: Prospect,
+        loom_url_update: LoomUrlUpdate,
         prospects=Depends(get_prospect_collection)
 ):
-    update_data = prospect_update.dict(exclude_unset=True)
-    loom_video_url = update_data.get("loom_video_url", None)
-
-    if loom_video_url is None:
-        raise HTTPException(status_code=400, detail="No loom_video_url provided")
-
     update_result = await prospects.update_one(
         {"_id": ObjectId(prospect_id)},
-        {"$set": {"loom_video_url": loom_video_url}}
+        {"$set": {"loom_video_url": loom_url_update.loom_video_url}}
     )
 
     if update_result.modified_count == 0:
