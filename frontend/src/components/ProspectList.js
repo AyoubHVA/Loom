@@ -19,7 +19,11 @@ const ProspectList = ({ clientId, onProspectSelect }) => {
 
   const handleProspectClick = (prospectId) => {
     console.log(`Prospect clicked: ${prospectId}`);
-    onProspectSelect(prospectId);
+    if (onProspectSelect) {
+      onProspectSelect(prospectId);
+    } else {
+      console.error('onProspectSelect is not a function', onProspectSelect);
+    }
   };
 
   return (

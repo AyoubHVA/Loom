@@ -27,21 +27,18 @@ export const updateProspectLoomUrl = async (prospectId, loomVideoUrl) => {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
-        // Include other headers such as Authorization if required
       },
       body: JSON.stringify({ loom_video_url: loomVideoUrl }),
     });
 
     if (!response.ok) {
-      // Handle non-2xx responses
       const errorData = await response.text();
-      console.error(`Error updating prospect Loom URL: ${errorData}`);
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status}: ${errorData}`);
     }
 
     return await response.json();
   } catch (error) {
     console.error('Error updating prospect Loom URL:', error);
-    throw error; // Rethrow the error if you want to handle it outside
+    // Possibly handle error state in UI as well
   }
 };
