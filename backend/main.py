@@ -98,7 +98,6 @@ async def list_prospects(client_id: str, prospects=Depends(get_prospect_collecti
 
 @app.patch("/prospects/{prospect_id}/", response_model=Prospect)
 async def update_prospect_loom_url(prospect_id: str, loom_video_url: str, prospects=Depends(get_prospect_collection)):
-
     update_result = await prospects.update_one(
         {"_id": ObjectId(prospect_id)},
         {"$set": {"loom_video_url": loom_video_url}}
@@ -116,3 +115,16 @@ async def update_prospect_loom_url(prospect_id: str, loom_video_url: str, prospe
     del updated_prospect["_id"]
 
     return updated_prospect
+
+
+# endpoint for a single prospect
+@app.get("/prospects/{prospect_id}/", response_model=Prospect)
+async def get_prospect(prospect_id: str, prospects=Depends(get_prospect_collection)):
+    _id = parse_object_id(prospect_id)
+    prospect = await prospects.find_one({"_id": _id})
+    if prospect:
+        prospect["id"] = str(prospect["_id"])
+        del prospect["_id"]  # Convert the '_id' field from ObjectId to string and remove it
+        return prospect
+    raise HTTPException(status_code=404, detail="Prospect not found")
+
