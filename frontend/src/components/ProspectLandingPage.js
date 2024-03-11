@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { fetchProspectData, updateProspectLoomUrl } from '../api/ClientsApi';
-import LoomUrlModal from '../modals/LoomUrlModal'; // Adjust the import path as necessary
+import LoomUrlModal from '../modals/LoomUrlModal';
 
 const ProspectLandingPage = ({ prospectId, isModalOpen, setIsModalOpen }) => {
   const [prospect, setProspect] = useState(null);
@@ -23,11 +23,13 @@ const ProspectLandingPage = ({ prospectId, isModalOpen, setIsModalOpen }) => {
     };
 
     if (prospectId) {
+        console.log(`Attempting to fetch prospect data for ID: ${prospectId}`);
       getProspectData().then(r => console.log('Prospect data fetched:', r));
     }
   }, [prospectId]);
 
   const handleLoomUrlSubmit = async (newUrl) => {
+       console.log(`Submitting new Loom URL: ${newUrl} for prospect ID: ${prospectId}`);
     try {
       const updatedProspect = await updateProspectLoomUrl(prospectId, newUrl);
       setProspect(updatedProspect);
