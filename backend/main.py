@@ -7,7 +7,6 @@ from model import Client, Prospect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-
 app = FastAPI()
 
 
@@ -149,20 +148,23 @@ async def setup_domain(domain_setup: DomainSetup, clients=Depends(get_client_col
     client_id = domain_setup.client_id
     domain = domain_setup.domain
 
-    # Check if client exists
+    # Check if client exists by trying to fetch it from the database
     existing_client = await clients.find_one({"_id": ObjectId(client_id)})
     if not existing_client:
+        # If the client does not exist, raise an HTTPException
         raise HTTPException(status_code=404, detail="Client not found")
 
-    # Perform the update operation
+    # If the client exists, perform the update operation
     update_result = await clients.update_one(
         {"_id": ObjectId(client_id)},
         {"$set": {"domain": domain}}
     )
 
     if update_result.modified_count == 0:
+        # If the domain is unchanged, raise an HTTPException
         raise HTTPException(status_code=404, detail="Domain is unchanged")
 
+    # Return a successful response
     return {"message": "Domain setup successful", "client_id": client_id, "domain": domain}
 
 
