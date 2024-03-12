@@ -29,6 +29,7 @@ class DomainSetupResponse(BaseModel):
 origins = [
     "http://localhost:8000",
     "https://www.jamairo.buzz",
+    "https://api.jamairo.buzz",
 ]
 
 # Add CORS middleware
