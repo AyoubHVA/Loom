@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 from bson import ObjectId
 from bson.errors import InvalidId
 from fastapi import FastAPI, HTTPException, Depends
@@ -17,6 +17,13 @@ class LoomUrlUpdate(BaseModel):
 class DomainSetup(BaseModel):
     client_id: str
     domain: str
+
+
+class DomainSetupResponse(BaseModel):
+    message: str
+    client_id: str
+    domain: str
+    dns_records: List[Dict[str, str]]
 
 
 origins = [
@@ -143,29 +150,39 @@ async def get_prospect(prospect_id: str, prospects=Depends(get_prospect_collecti
     raise HTTPException(status_code=404, detail="Prospect not found")
 
 
-@app.post("/setup-domain/")
+# ...
+@app.post("/setup-domain/", response_model=DomainSetupResponse)
 async def setup_domain(domain_setup: DomainSetup, clients=Depends(get_client_collection)):
     client_id = domain_setup.client_id
     domain = domain_setup.domain
 
-    # Check if client exists by trying to fetch it from the database
+    # Check if client exists
     existing_client = await clients.find_one({"_id": ObjectId(client_id)})
     if not existing_client:
-        # If the client does not exist, raise an HTTPException
         raise HTTPException(status_code=404, detail="Client not found")
 
-    # If the client exists, perform the update operation
+    # Perform the update operation
     update_result = await clients.update_one(
         {"_id": ObjectId(client_id)},
         {"$set": {"domain": domain}}
     )
 
     if update_result.modified_count == 0:
-        # If the domain is unchanged, raise an HTTPException
         raise HTTPException(status_code=404, detail="Domain is unchanged")
 
-    # Return a successful response
-    return {"message": "Domain setup successful", "client_id": client_id, "domain": domain}
+    # The instruction message for DNS records
+    dns_instruction_message = (
+        "Please create a CNAME record with the name 'video' pointing to 'your.api.endpoint.com' "
+        "in your DNS management panel. This may take up to 48 hours to propagate."
+    )
+
+    # Return a successful response with DNS instructions
+    return {
+        "message": "Domain setup successful",
+        "client_id": client_id,
+        "domain": domain,
+        "dns_records_instruction": dns_instruction_message
+    }
 
 
 class DomainVerification(BaseModel):
