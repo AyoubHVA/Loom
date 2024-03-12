@@ -1,50 +1,65 @@
 import React, { useState } from 'react';
 import { setupDomain, verifyDomain } from '../api/ClientsApi';
 
-const DomainSetup = ({ clientId }) => {
+const DomainSetup = ({ clientId, onDomainVerified }) => {
   const [domain, setDomain] = useState('');
-  const [isVerified, setIsVerified] = useState(false);
+  const [verificationInProgress, setVerificationInProgress] = useState(false);
+  const [verificationStatus, setVerificationStatus] = useState('');
 
   const handleDomainSubmit = async () => {
     try {
-      // Here you would have an endpoint to initiate the domain setup process
-      await setupDomain().post('/setup-domain', { clientId, domain });
-      alert('Please update your DNS settings as instructed and click verify when done.');
+      const setupResponse = await setupDomain(clientId, domain);
+      // Assuming setupResponse will include DNS records information
+      alert(`Please add the following DNS records to your domain's settings:\n${setupResponse.dnsRecords}`);
+      setVerificationInProgress(true);
     } catch (error) {
       console.error('Error setting up domain:', error);
+      alert('Failed to initiate domain setup. Please try again.');
     }
   };
 
   const handleVerifyDomain = async () => {
     try {
-      // Endpoint to verify domain
-      const response = await verifyDomain().get(`/verify-domain?clientId=${clientId}&domain=${domain}`);
-      if (response.data.isVerified) {
-        setIsVerified(true);
-        alert('Domain verified! Now you can setup your Loom URL.');
+      setVerificationInProgress(true);
+      const verifyResponse = await verifyDomain(clientId, domain);
+      if (verifyResponse.isVerified) {
+        setVerificationStatus('success');
+        alert('Domain verified successfully! You can now proceed.');
+        onDomainVerified(true);
       } else {
-        alert('Domain not verified yet. Please ensure DNS settings are correct and propagated.');
+        setVerificationStatus('failed');
+        alert('Domain verification failed. Please ensure the DNS settings are correct and have propagated.');
       }
     } catch (error) {
       console.error('Error verifying domain:', error);
+      setVerificationStatus('failed');
+      alert('An error occurred during domain verification.');
+    } finally {
+      setVerificationInProgress(false);
     }
   };
 
   return (
     <div>
-      {!isVerified ? (
+      <h2>Setup Your Custom Domain</h2>
+      {verificationStatus !== 'success' && (
         <>
           <input
             type="text"
             value={domain}
             onChange={(e) => setDomain(e.target.value)}
             placeholder="Enter your custom domain"
+            disabled={verificationInProgress}
           />
-          <button onClick={handleDomainSubmit}>Setup Domain</button>
-          <button onClick={handleVerifyDomain}>Verify Domain</button>
+          <button onClick={handleDomainSubmit} disabled={verificationInProgress}>Setup Domain</button>
+          <button onClick={handleVerifyDomain} disabled={verificationInProgress || !domain}>Verify Domain</button>
         </>
-      ) : (
-        <p>Domain is verified. You can now add your Loom video URL.</p>
+      )}
+      {verificationStatus === 'success' && (
+        <p>Domain verified! You can now add your Loom video URL.</p>
+      )}
+      {verificationStatus === 'failed' && (
+        <p>Domain verification failed. Please check the instructions and try again.</p>
       )}
     </div>
   );
