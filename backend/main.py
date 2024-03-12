@@ -14,6 +14,11 @@ class LoomUrlUpdate(BaseModel):
     loom_video_url: str
 
 
+class DomainSetup(BaseModel):
+    client_id: str
+    domain: str
+
+
 origins = [
     "http://localhost:8000",
     "https://www.jamairo.buzz",
@@ -136,3 +141,35 @@ async def get_prospect(prospect_id: str, prospects=Depends(get_prospect_collecti
         del prospect["_id"]  # Convert the '_id' field from ObjectId to string and remove it
         return prospect
     raise HTTPException(status_code=404, detail="Prospect not found")
+
+
+@app.post("/setup-domain/")
+async def setup_domain(domain_setup: DomainSetup, clients=Depends(get_client_collection)):
+    client_id = domain_setup.client_id
+    domain = domain_setup.domain
+
+    # Asynchronous update call
+    update_result = await clients.update_one({"_id": client_id}, {"$set": {"domain": domain}})
+
+    if update_result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Client not found or domain is unchanged")
+
+    return {"message": "Domain setup successful", "client_id": client_id, "domain": domain}
+
+
+class DomainVerification(BaseModel):
+    verified: bool
+
+
+@app.patch("/verify-domain/{client_id}")
+async def verify_domain(client_id: str, domain_verification: DomainVerification,
+                        clients=Depends(get_client_collection)):
+    update_result = await clients.update_one({"_id": client_id},
+                                             {"$set": {"domain_verified": domain_verification.verified}})
+
+    if update_result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Client not found or verification status is unchanged")
+
+    return {"message": "Domain verification status updated", "client_id": client_id,
+            "verified": domain_verification.verified}
+
