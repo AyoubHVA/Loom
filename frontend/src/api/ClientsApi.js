@@ -34,36 +34,36 @@ export const updateProspectLoomUrl = async (prospectId, loomVideoUrl) => {
         // Possibly handle error state in UI as well
     }
 };
-
-// Add new functions for domain setup and verification
+// Example of setting up a domain from the frontend
 export const setupDomain = async (clientId, domain) => {
-    const response = await fetch(`${API_BASE_URL}/setup-domain`, {
+    const response = await fetch('https://api.jamairo.buzz/setup-domain/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({clientId, domain}),
+        body: JSON.stringify({client_id: clientId, domain}),
     });
 
     if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    return await response.json();
+    return response.json();
 };
 
-export const verifyDomain = async (clientId) => {
-    const response = await fetch(`${API_BASE_URL}/verify-domain/${clientId}`, {
+// Example of verifying a domain from the frontend
+export const verifyDomain = async (clientId, isVerified) => {
+    const response = await fetch(`https://api.jamairo.buzz/verify-domain/${clientId}`, {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({verified: true}), // Assuming verification is a simple boolean for now
+        body: JSON.stringify({verified: isVerified}),
     });
 
     if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    return await response.json();
+    return response.json();
 };
