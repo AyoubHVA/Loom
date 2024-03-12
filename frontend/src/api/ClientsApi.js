@@ -37,7 +37,7 @@ export const updateProspectLoomUrl = async (prospectId, loomVideoUrl) => {
 // Example of setting up a domain from the frontend
 // Example of setting up a domain from the frontend
 export const setupDomain = async (clientId, domain) => {
-    const response = await fetch(`${API_BASE_URL}/setup-domain`, { // Removed the trailing slash
+    const response = await fetch(`${API_BASE_URL}/setup-domain/`, { // Removed the trailing slash
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
