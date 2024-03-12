@@ -35,8 +35,9 @@ export const updateProspectLoomUrl = async (prospectId, loomVideoUrl) => {
     }
 };
 // Example of setting up a domain from the frontend
+// Example of setting up a domain from the frontend
 export const setupDomain = async (clientId, domain) => {
-    const response = await fetch('https://api.jamairo.buzz/setup-domain/', {
+    const response = await fetch(`${API_BASE_URL}/setup-domain`, { // Removed the trailing slash
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -53,7 +54,7 @@ export const setupDomain = async (clientId, domain) => {
 
 // Example of verifying a domain from the frontend
 export const verifyDomain = async (clientId, isVerified) => {
-    const response = await fetch(`https://api.jamairo.buzz/verify-domain/${clientId}`, {
+    const response = await fetch(`${API_BASE_URL}/verify-domain/${clientId}`, { // Ensure this matches your FastAPI route
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json',
