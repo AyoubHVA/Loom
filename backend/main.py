@@ -182,18 +182,12 @@ async def setup_domain(domain_setup: DomainSetup, clients=Depends(get_client_col
     if update_result.modified_count == 0:
         raise HTTPException(status_code=404, detail="Domain is unchanged")
 
-    # The instruction message for DNS records
-    dns_instruction_message = (
-        "Please create a CNAME record with the name 'video' pointing to 'your.api.endpoint.com' "
-        "in your DNS management panel. This may take up to 48 hours to propagate."
-    )
-
     # Return a successful response with DNS instructions
     return {
         "message": "Domain setup successful",
         "client_id": client_id,
         "domain": domain,
-        "dns_records_instruction": dns_instruction_message
+
     }
 
 
