@@ -23,13 +23,12 @@ class DomainSetupResponse(BaseModel):
     message: str
     client_id: str
     domain: str
-    dns_records: List[Dict[str, str]]
+    dns_records_instruction: str
 
 
 origins = [
     "http://localhost:8000",
     "https://www.jamairo.buzz",
-    "https://api.jamairo.buzz",
 ]
 
 # Add CORS middleware
@@ -40,6 +39,18 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+async def client_exists(client_id: str, clients):
+    try:
+        # If the client_id is not a valid ObjectId, return False
+        oid = ObjectId(client_id)
+    except InvalidId:
+        return False
+
+    # Check if the client exists in the database
+    existing_client = await clients.find_one({"_id": oid})
+    return existing_client is not None
 
 
 @app.get("/")
