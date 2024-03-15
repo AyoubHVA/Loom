@@ -152,13 +152,12 @@ async def setup_domain(domain_setup: DomainSetup, clients=Depends(get_client_col
     client_id = domain_setup.client_id
     domain = domain_setup.domain
 
-    # Check if client exists
     existing_client = await clients.find_one({"_id": ObjectId(client_id)})
     if not existing_client:
         raise HTTPException(status_code=404, detail="Client not found")
 
-    # Check if the domain is already configured for this client
     if 'domain' in existing_client and existing_client['domain'] == domain:
+        # Domain is already configured
         dns_instructions = DNSInstruction(
             message="Client already has this domain configured, please select prospect.",
             record_type="CNAME",
@@ -173,14 +172,26 @@ async def setup_domain(domain_setup: DomainSetup, clients=Depends(get_client_col
             dns_records=[dns_instructions]
         )
 
-    # Perform the update operation
     update_result = await clients.update_one(
         {"_id": ObjectId(client_id)},
         {"$set": {"domain": domain}}
     )
-
     if update_result.modified_count == 0:
         raise HTTPException(status_code=404, detail="Domain is unchanged")
+
+    dns_instructions = DNSInstruction(
+        message="Please add the following CNAME record:",
+        record_type="CNAME",
+        host="video",
+        points_to="api.jamairo.buzz",
+        ttl=3600
+    )
+    return DomainSetupResponse(
+        message="Domain setup initiated successfully.",
+        client_id=client_id,
+        domain=domain,
+        dns_records=[dns_instructions]
+    )
 
 
 @app.patch("/verify-domain/{client_id}")
