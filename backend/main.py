@@ -183,20 +183,17 @@ async def setup_domain(domain_setup: DomainSetup, clients=Depends(get_client_col
         raise HTTPException(status_code=404, detail="Domain is unchanged")
 
     # The instruction message for DNS records
-    dns_instructions = {
-        "message": "Please add the following CNAME record:",
-        "record_type": "CNAME",
-        "host": "video",
-        "points_to": "api.yourdomain.com",
-        "ttl": "3600"
-    }
+    dns_instruction_message = (
+        "Please create a CNAME record with the name 'video' pointing to 'api.jamairo.buzz' "
+        "in your DNS management panel. This may take up to 48 hours to propagate."
+    )
 
     # Return a successful response with DNS instructions
     return {
         "message": "Domain setup successful",
         "client_id": client_id,
         "domain": domain,
-        "dns_records_instruction": dns_instructions
+        "dns_records_instruction": dns_instruction_message
     }
 
 
