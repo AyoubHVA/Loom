@@ -5,6 +5,7 @@ from bson import ObjectId
 from bson.errors import InvalidId
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from database import get_client_collection, get_prospect_collection
 from model import Client, Prospect, LoomUrlUpdate, DomainSetup, DomainSetupResponse, DNSInstruction
@@ -158,26 +159,25 @@ async def setup_domain(domain_setup: DomainSetup, clients=Depends(get_client_col
 
     if 'domain' in existing_client and existing_client['domain'] == domain:
         # Domain is already configured
-        dns_instructions = DNSInstruction(
-            message="Client already has this domain configured, please select prospect.",
-            record_type="CNAME",
-            host="video",
-            points_to="api.jamairo.buzz",
-            ttl=3600
-        )
-        return DomainSetupResponse(
-            message="Client already has this domain configured, please select prospect.",
-            client_id=client_id,
-            domain=domain,
-            dns_records=[dns_instructions]
+        return JSONResponse(
+            status_code=200,
+            content={
+                "message": "Client already has this domain configured, please select prospect.",
+                "client_id": client_id,
+                "domain": domain,
+                "status": "existing"
+            }
         )
 
+    # Setup domain logic goes here, for a new domain setup
+
+    # If the domain is new for the client, then proceed with the setup
     update_result = await clients.update_one(
         {"_id": ObjectId(client_id)},
         {"$set": {"domain": domain}}
     )
     if update_result.modified_count == 0:
-        raise HTTPException(status_code=404, detail="Domain is unchanged")
+        raise HTTPException(status_code=404, detail="Domain setup could not be initiated")
 
     dns_instructions = DNSInstruction(
         message="Please add the following CNAME record:",
@@ -186,11 +186,14 @@ async def setup_domain(domain_setup: DomainSetup, clients=Depends(get_client_col
         points_to="api.jamairo.buzz",
         ttl=3600
     )
-    return DomainSetupResponse(
-        message="Domain setup initiated successfully.",
-        client_id=client_id,
-        domain=domain,
-        dns_records=[dns_instructions]
+    return JSONResponse(
+        status_code=200,
+        content={
+            "message": "Domain setup initiated successfully.",
+            "client_id": client_id,
+            "domain": domain,
+            "dns_records": [dns_instructions.dict()]  # Use Pydantic's dict method
+        }
     )
 
 
