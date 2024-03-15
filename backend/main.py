@@ -172,7 +172,7 @@ async def setup_domain(domain_setup: DomainSetup, clients=Depends(get_client_col
         message="Please add the following CNAME record:",
         record_type="CNAME",
         host="video",
-        points_to_or_value="api.jamairo.buzz",
+        points_to="api.jamairo.buzz",
         ttl=3600
     )
 
