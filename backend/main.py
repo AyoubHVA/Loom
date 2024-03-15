@@ -172,7 +172,7 @@ async def setup_domain(domain_setup: DomainSetup, clients=Depends(get_client_col
         message="Please add the following CNAME record:",
         record_type="CNAME",
         host="video",
-        points_to="api.jamairo.buzz",
+        points_to="api.jamairo.buzz",  # Make sure this is the intended target
         ttl=3600
     )
 
@@ -183,6 +183,7 @@ async def setup_domain(domain_setup: DomainSetup, clients=Depends(get_client_col
         "domain": domain,
         "dns_records": [dns_instructions.dict()]  # Convert the Pydantic model to a dict
     }
+
 
 
 @app.patch("/verify-domain/{client_id}")
