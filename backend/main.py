@@ -5,9 +5,39 @@ from bson import ObjectId
 from bson.errors import InvalidId
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
 from database import get_client_collection, get_prospect_collection
-from model import Client, Prospect, LoomUrlUpdate, DomainSetup, DomainSetupResponse, DNSInstruction
+from model import Client, Prospect
+
+
+class LoomUrlUpdate(BaseModel):
+    loom_video_url: str
+
+
+class DomainSetup(BaseModel):
+    client_id: str
+    domain: str
+
+
+class DNSInstruction(BaseModel):
+    message: str
+    record_type: str
+    host: str
+    points_to: str
+    ttl: int
+
+
+class DomainSetupResponse(BaseModel):
+    message: str
+    client_id: str
+    domain: str
+    dns_records: List[DNSInstruction]
+
+
+class DomainVerification(BaseModel):
+    verified: bool
+
 
 app = FastAPI()
 
@@ -183,7 +213,6 @@ async def setup_domain(domain_setup: DomainSetup, clients=Depends(get_client_col
         "domain": domain,
         "dns_records": [dns_instructions.dict()]  # Convert the Pydantic model to a dict
     }
-
 
 
 @app.patch("/verify-domain/{client_id}")
