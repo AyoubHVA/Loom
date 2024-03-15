@@ -158,6 +158,10 @@ async def setup_domain(domain_setup: DomainSetup, clients=Depends(get_client_col
     if not existing_client:
         raise HTTPException(status_code=404, detail="Client not found")
 
+    if 'domain' in existing_client and existing_client['domain'] == domain:
+        return {"message": "Client already has this domain configured, please select prospect", "client_id": client_id,
+                "domain": domain, "status": "existing"}
+
     # Perform the update operation
     update_result = await clients.update_one(
         {"_id": ObjectId(client_id)},
