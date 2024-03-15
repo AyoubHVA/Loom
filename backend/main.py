@@ -1,11 +1,13 @@
-from typing import List, Dict
+from typing import List
+
 from bson import ObjectId
 from bson.errors import InvalidId
 from fastapi import FastAPI, HTTPException, Depends
-from database import get_client_collection, get_prospect_collection
-from model import Client, Prospect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+
+from database import get_client_collection, get_prospect_collection
+from model import Client, Prospect
 
 app = FastAPI()
 
@@ -193,10 +195,10 @@ async def setup_domain(domain_setup: DomainSetup, clients=Depends(get_client_col
 
     # Return a successful response with DNS instructions
     return {
-        "message": "Domain setup successful",
+        "message": "Domain setup initiated successfully.",
         "client_id": client_id,
         "domain": domain,
-        "dns_records_instruction": dns_instructions
+        "dns_records": [dns_instructions]
     }
 
 
