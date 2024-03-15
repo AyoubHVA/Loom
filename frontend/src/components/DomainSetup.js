@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { setupDomain, verifyDomain, fetchProspectData } from '../api/ClientsApi';
 
 const DomainSetup = ({ clientId, onDomainVerified, onProspectsFetched }) => {
@@ -6,25 +6,18 @@ const DomainSetup = ({ clientId, onDomainVerified, onProspectsFetched }) => {
     const [verificationInProgress, setVerificationInProgress] = useState(false);
     const [dnsRecords, setDnsRecords] = useState([]);
     const [verificationMessage, setVerificationMessage] = useState('');
-
-    useEffect(() => {
-        if (onDomainVerified && dnsRecords.length === 0) {
-            fetchProspectData(clientId).then(prospects => {
-                onProspectsFetched(prospects);
-            });
-        }
-    }, [clientId, onDomainVerified, dnsRecords.length, onProspectsFetched]);
+    const [domainSetupComplete, setDomainSetupComplete] = useState(false);
 
     const handleDomainSubmit = async () => {
         setVerificationInProgress(true);
-        setVerificationMessage('');
         try {
-            const setupResponse = await setupDomain(clientId, domain);
-            if (setupResponse.message === "Domain setup initiated successfully.") {
-                setDnsRecords(setupResponse.dns_records);
+            const response = await setupDomain(clientId, domain);
+            if (response.status === 'existing') {
+                setVerificationMessage("Client already has this domain configured, please verify.");
+                setDomainSetupComplete(true); // Proceed to verification
             } else {
-                setVerificationMessage(setupResponse.message);
-                onDomainVerified(true); // Assuming that if the domain is already configured, it's also verified
+                setDnsRecords(response.dns_records || []);
+                setVerificationMessage("Please add the following DNS records to your domain's settings:");
             }
         } catch (error) {
             console.error('Error setting up domain:', error);
@@ -36,10 +29,15 @@ const DomainSetup = ({ clientId, onDomainVerified, onProspectsFetched }) => {
     const handleVerifyDomain = async () => {
         setVerificationInProgress(true);
         try {
-            const verifyResponse = await verifyDomain(clientId, true); // Here, we're assuming the verifyDomain endpoint accepts a boolean parameter for verification
+            const verifyResponse = await verifyDomain(clientId);
             if (verifyResponse.verified) {
-                setVerificationMessage(verifyResponse.message);
+                setVerificationMessage('Domain verified successfully.');
                 onDomainVerified(true);
+                fetchProspectData(clientId).then(prospects => {
+                    onProspectsFetched(prospects);
+                }).catch(error => {
+                    console.error('Error fetching prospect data:', error);
+                });
             } else {
                 setVerificationMessage('Domain verification failed. Please ensure the DNS settings are correct and have propagated.');
             }
@@ -53,7 +51,7 @@ const DomainSetup = ({ clientId, onDomainVerified, onProspectsFetched }) => {
     return (
         <div>
             <h2>Setup Your Custom Domain</h2>
-            {!dnsRecords.length && (
+            {!domainSetupComplete && (
                 <>
                     <input
                         type="text"
@@ -69,12 +67,20 @@ const DomainSetup = ({ clientId, onDomainVerified, onProspectsFetched }) => {
             )}
             {dnsRecords.length > 0 && (
                 <>
-                    <p>Please add the following DNS records to your domain's settings:</p>
+                    <p>{verificationMessage}</p>
                     <ul>
                         {dnsRecords.map((record, index) => (
-                            <li key={index}>{`Type: ${record.record_type}, Host: ${record.host}, Points to: ${record.points_to}, TTL: ${record.ttl}`}</li>
+                            <li key={index}>{`${record.record_type} ${record.host} -> ${record.points_to} TTL: ${record.ttl}`}</li>
                         ))}
                     </ul>
+                    <button onClick={handleVerifyDomain} disabled={verificationInProgress}>
+                        Verify Domain
+                    </button>
+                </>
+            )}
+            {domainSetupComplete && !dnsRecords.length && (
+                <>
+                    <p>{verificationMessage}</p>
                     <button onClick={handleVerifyDomain} disabled={verificationInProgress}>
                         Verify Domain
                     </button>

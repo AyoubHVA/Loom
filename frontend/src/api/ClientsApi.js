@@ -53,18 +53,23 @@ export const setupDomain = async (clientId, domain) => {
 
 
 // Example of verifying a domain from the frontend
-export const verifyDomain = async (clientId, isVerified) => {
-    const response = await fetch(`${API_BASE_URL}/verify-domain/${clientId}`, { // Ensure this matches your FastAPI route
-        method: 'PATCH',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({verified: isVerified}),
-    });
+export const verifyDomain = async (clientId) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/verify-domain/${clientId}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
 
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error during domain verification:', error);
+        // Handle error state in UI as needed
+        throw error; // Rethrow the error if you need to handle it upstream
     }
-
-    return response.json();
 };
