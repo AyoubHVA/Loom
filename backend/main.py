@@ -17,6 +17,8 @@ origins = [
     "https://www.jamairo.buzz",
 ]
 
+EXPECTED_ENDPOINTS = "api.jamairo.buzz"
+
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
@@ -206,19 +208,17 @@ async def verify_domain(client_id: str, clients=Depends(get_client_collection)):
     domain_to_check = 'video.' + client['domain']
 
     try:
-        # This is a synchronous call, you might want to run this in the background
         answers = dns.resolver.resolve(domain_to_check, 'CNAME')
         for record in answers:
-            if record.target.to_text().rstrip(
-                    '.') == 'api.jamairo.buzz':  # Make sure this matches your expected API endpoint
+            if record.target.to_text().rstrip('.') in EXPECTED_ENDPOINTS:
                 await clients.update_one(
                     {"_id": ObjectId(client_id)},
                     {"$set": {"domain_verified": True}}
                 )
-                return {"message": "Domain verification successful"}
+                return {"message": "Domain verification successful", "verified": True}
+        # If no records match the expected endpoint, consider the verification failed
+        raise HTTPException(status_code=400, detail="CNAME record does not match expected endpoints")
     except dns.resolver.NoAnswer:
         raise HTTPException(status_code=400, detail="CNAME record not found")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-    raise HTTPException(status_code=400, detail="Domain verification failed")
