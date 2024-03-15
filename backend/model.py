@@ -65,7 +65,7 @@ class DomainSetupResponse(BaseModel):
     message: str
     client_id: str
     domain: str
-    dns_records: List[DNSInstruction]
+    dns_records: Optional[List[DNSInstruction]] = None
 
 
 class DomainVerification(BaseModel):
