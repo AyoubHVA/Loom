@@ -4,27 +4,29 @@ import { setupDomain, verifyDomain } from '../api/ClientsApi';
 const DomainSetup = ({ clientId, onDomainVerified }) => {
   const [domain, setDomain] = useState('');
   const [verificationInProgress, setVerificationInProgress] = useState(false);
-  const [dnsRecords, setDnsRecords] = useState([]);
+  const [dnsRecordsInstruction, setDnsRecordsInstruction] = useState('');
   const [verificationMessage, setVerificationMessage] = useState('');
+  const [verificationSuccess, setVerificationSuccess] = useState(false);
 
   const handleDomainSubmit = async () => {
+    setVerificationInProgress(true);
+    setVerificationMessage('');
     try {
-      setVerificationInProgress(true);
       const setupResponse = await setupDomain(clientId, `video.${domain}`);
-      setDnsRecords(setupResponse.dns_records); // Now we directly set the array of records
-      setVerificationInProgress(false);
+      setDnsRecordsInstruction(setupResponse.dns_records_instruction);
     } catch (error) {
       console.error('Error setting up domain:', error);
-      alert('Failed to initiate domain setup. Please try again.');
-      setVerificationInProgress(false);
+      setVerificationMessage('Failed to initiate domain setup. Please try again.');
     }
+    setVerificationInProgress(false);
   };
 
   const handleVerifyDomain = async () => {
     setVerificationInProgress(true);
     try {
-      const verifyResponse = await verifyDomain(clientId, true);
+      const verifyResponse = await verifyDomain(clientId);
       setVerificationMessage(verifyResponse.message);
+      setVerificationSuccess(verifyResponse.verified);
       onDomainVerified(verifyResponse.verified);
     } catch (error) {
       console.error('Error verifying domain:', error);
@@ -36,7 +38,7 @@ const DomainSetup = ({ clientId, onDomainVerified }) => {
   return (
     <div>
       <h2>Setup Your Custom Domain</h2>
-      {!verificationInProgress && !dnsRecords.length && (
+      {!dnsRecordsInstruction && (
         <>
           <input
             type="text"
@@ -50,20 +52,16 @@ const DomainSetup = ({ clientId, onDomainVerified }) => {
           </button>
         </>
       )}
-      {dnsRecords.length > 0 && (
+      {dnsRecordsInstruction && !verificationSuccess && (
         <>
-          <p>Please add the following DNS records to your domain's settings:</p>
-          <ul>
-            {dnsRecords.map((record, index) => (
-              <li key={index}>
-                Type: {record.record_type}, Host: {record.host}, Points to: {record.points_to}, TTL: {record.ttl}
-              </li>
-            ))}
-          </ul>
+          <p>{dnsRecordsInstruction}</p>
           <button onClick={handleVerifyDomain} disabled={verificationInProgress}>
             Verify Domain
           </button>
         </>
+      )}
+      {verificationSuccess && (
+        <p>Domain verified successfully. You can now use your custom domain for prospects.</p>
       )}
       <p>{verificationMessage}</p>
     </div>
