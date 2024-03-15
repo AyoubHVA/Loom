@@ -1,12 +1,13 @@
 from typing import List
 
+import dns.resolver
 from bson import ObjectId
 from bson.errors import InvalidId
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
 from database import get_client_collection, get_prospect_collection
-from model import Client, Prospect, LoomUrlUpdate, DomainSetup, DomainSetupResponse, DomainVerification, DNSInstruction
+from model import Client, Prospect, LoomUrlUpdate, DomainSetup, DomainSetupResponse, DNSInstruction
 
 app = FastAPI()
 
@@ -185,21 +186,27 @@ async def setup_domain(domain_setup: DomainSetup, clients=Depends(get_client_col
 
 
 @app.patch("/verify-domain/{client_id}")
-async def verify_domain(client_id: str, domain_verification: DomainVerification,
-                        clients=Depends(get_client_collection)):
-    # Check if client exists
-    existing_client = await clients.find_one({"_id": ObjectId(client_id)})
-    if not existing_client:
+async def verify_domain(client_id: str, clients=Depends(get_client_collection)):
+    client = await clients.find_one({"_id": ObjectId(client_id)})
+    if not client:
         raise HTTPException(status_code=404, detail="Client not found")
 
-    # Update the verification status
-    update_result = await clients.update_one(
-        {"_id": ObjectId(client_id)},
-        {"$set": {"domain_verified": domain_verification.verified}}
-    )
+    domain_to_check = 'video.' + client['domain']
 
-    if update_result.modified_count == 0:
-        raise HTTPException(status_code=404, detail="Verification status is unchanged")
+    try:
+        # This is a synchronous call, you might want to run this in the background
+        answers = dns.resolver.resolve(domain_to_check, 'CNAME')
+        for record in answers:
+            if record.target.to_text().rstrip(
+                    '.') == 'api.jamairo.buzz':  # Make sure this matches your expected API endpoint
+                await clients.update_one(
+                    {"_id": ObjectId(client_id)},
+                    {"$set": {"domain_verified": True}}
+                )
+                return {"message": "Domain verification successful"}
+    except dns.resolver.NoAnswer:
+        raise HTTPException(status_code=400, detail="CNAME record not found")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
-    return {"message": "Domain verification status updated", "client_id": client_id,
-            "verified": domain_verification.verified}
+    raise HTTPException(status_code=400, detail="Domain verification failed")
