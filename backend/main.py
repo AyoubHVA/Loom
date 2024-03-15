@@ -21,13 +21,6 @@ class DomainSetup(BaseModel):
     domain: str
 
 
-class DomainSetupResponse(BaseModel):
-    message: str
-    client_id: str
-    domain: str
-    dns_records_instruction: str
-
-
 origins = [
     "http://localhost:8000",
     "https://www.jamairo.buzz",
@@ -164,6 +157,21 @@ async def get_prospect(prospect_id: str, prospects=Depends(get_prospect_collecti
     raise HTTPException(status_code=404, detail="Prospect not found")
 
 
+class DNSInstruction(BaseModel):
+    message: str
+    record_type: str
+    host: str
+    points_to: str
+    ttl: int
+
+
+class DomainSetupResponse(BaseModel):
+    message: str
+    client_id: str
+    domain: str
+    dns_records: List[DNSInstruction]
+
+
 # ...
 @app.post("/setup-domain/", response_model=DomainSetupResponse)
 async def setup_domain(domain_setup: DomainSetup, clients=Depends(get_client_collection)):
@@ -185,20 +193,20 @@ async def setup_domain(domain_setup: DomainSetup, clients=Depends(get_client_col
         raise HTTPException(status_code=404, detail="Domain is unchanged")
 
     # The instruction message for DNS records
-    dns_instructions = {
-        "message": "Please add the following CNAME record:",
-        "record_type": "CNAME",
-        "host": "video",
-        "points_to": "api.yourdomain.com",
-        "ttl": "3600"
-    }
+    dns_instructions = DNSInstruction(
+        message="Please add the following CNAME record:",
+        record_type="CNAME",
+        host="video",
+        points_to="api.yourdomain.com",
+        ttl=3600
+    )
 
     # Return a successful response with DNS instructions
     return {
         "message": "Domain setup initiated successfully.",
         "client_id": client_id,
         "domain": domain,
-        "dns_records": [dns_instructions]
+        "dns_records": [dns_instructions.dict()]  # Convert the Pydantic model to a dict
     }
 
 
