@@ -34,10 +34,8 @@ export const updateProspectLoomUrl = async (prospectId, loomVideoUrl) => {
         // Possibly handle error state in UI as well
     }
 };
-
-// Example of setting up a domain from the frontend
 export const setupDomain = async (clientId, domain) => {
-    const response = await fetch(`${API_BASE_URL}/setup-domain/`, { // Removed the trailing slash
+    const response = await fetch(`${API_BASE_URL}/setup-domain/`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -46,11 +44,13 @@ export const setupDomain = async (clientId, domain) => {
     });
 
     if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json();
+        throw new Error(`HTTP error! status: ${response.status}: ${errorData.detail}`);
     }
 
     return response.json();
 };
+
 
 // Example of verifying a domain from the frontend
 export const verifyDomain = async (clientId, isVerified) => {

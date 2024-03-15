@@ -4,7 +4,7 @@ import { setupDomain, verifyDomain } from '../api/ClientsApi';
 const DomainSetup = ({ clientId, onDomainVerified }) => {
   const [domain, setDomain] = useState('');
   const [verificationInProgress, setVerificationInProgress] = useState(false);
-  const [dnsRecordsInstruction, setDnsRecordsInstruction] = useState('');
+  const [dnsRecords, setDnsRecords] = useState([]);
   const [verificationMessage, setVerificationMessage] = useState('');
   const [verificationSuccess, setVerificationSuccess] = useState(false);
 
@@ -13,7 +13,12 @@ const DomainSetup = ({ clientId, onDomainVerified }) => {
     setVerificationMessage('');
     try {
       const setupResponse = await setupDomain(clientId, `video.${domain}`);
-      setDnsRecordsInstruction(setupResponse.dns_records_instruction);
+      if (setupResponse && setupResponse.dns_records) {
+        setDnsRecords(setupResponse.dns_records);
+      } else {
+        // Handle the case where dns_records is not as expected
+        setVerificationMessage('Domain setup was successful but no DNS instructions were provided.');
+      }
     } catch (error) {
       console.error('Error setting up domain:', error);
       setVerificationMessage('Failed to initiate domain setup. Please try again.');
@@ -38,7 +43,7 @@ const DomainSetup = ({ clientId, onDomainVerified }) => {
   return (
     <div>
       <h2>Setup Your Custom Domain</h2>
-      {!dnsRecordsInstruction && (
+      {!dnsRecords.length && (
         <>
           <input
             type="text"
@@ -52,9 +57,16 @@ const DomainSetup = ({ clientId, onDomainVerified }) => {
           </button>
         </>
       )}
-      {dnsRecordsInstruction && !verificationSuccess && (
+      {dnsRecords.length > 0 && !verificationSuccess && (
         <>
-          <p>{dnsRecordsInstruction}</p>
+          <p>Please add the following DNS records to your domain's settings:</p>
+          <ul>
+            {dnsRecords.map((record, index) => (
+              <li key={index}>
+                Type: {record.record_type}, Host: {record.host}, Points to: {record.points_to}, TTL: {record.ttl}
+              </li>
+            ))}
+          </ul>
           <button onClick={handleVerifyDomain} disabled={verificationInProgress}>
             Verify Domain
           </button>
