@@ -147,7 +147,6 @@ async def get_prospect(prospect_id: str, prospects=Depends(get_prospect_collecti
     raise HTTPException(status_code=404, detail="Prospect not found")
 
 
-# ...
 @app.post("/setup-domain/", response_model=DomainSetupResponse)
 async def setup_domain(domain_setup: DomainSetup, clients=Depends(get_client_collection)):
     client_id = domain_setup.client_id
@@ -158,14 +157,21 @@ async def setup_domain(domain_setup: DomainSetup, clients=Depends(get_client_col
     if not existing_client:
         raise HTTPException(status_code=404, detail="Client not found")
 
-    # Check if the client already has this domain configured
-    if "domain" in existing_client and existing_client["domain"] == domain:
-        return {
-            "message": "Client already has this domain configured, please select prospect",
-            "client_id": client_id,
-            "domain": domain,
-            "dns_records": []
-        }
+    # Check if the domain is already configured for this client
+    if 'domain' in existing_client and existing_client['domain'] == domain:
+        dns_instructions = DNSInstruction(
+            message="Client already has this domain configured, please select prospect.",
+            record_type="CNAME",
+            host="video",
+            points_to="api.jamairo.buzz",
+            ttl=3600
+        )
+        return DomainSetupResponse(
+            message="Client already has this domain configured, please select prospect.",
+            client_id=client_id,
+            domain=domain,
+            dns_records=[dns_instructions]
+        )
 
     # Perform the update operation
     update_result = await clients.update_one(
@@ -175,23 +181,6 @@ async def setup_domain(domain_setup: DomainSetup, clients=Depends(get_client_col
 
     if update_result.modified_count == 0:
         raise HTTPException(status_code=404, detail="Domain is unchanged")
-
-    # The instruction message for DNS records
-    dns_instructions = DNSInstruction(
-        message="Please add the following CNAME record:",
-        record_type="CNAME",
-        host="video",
-        points_to="api.jamairo.buzz",  # Make sure this is the intended target
-        ttl=3600
-    )
-
-    # Return a successful response with DNS instructions
-    return {
-        "message": "Domain setup initiated successfully.",
-        "client_id": client_id,
-        "domain": domain,
-        "dns_records": [dns_instructions.dict()]  # Convert the Pydantic model to a dict
-    }
 
 
 @app.patch("/verify-domain/{client_id}")
