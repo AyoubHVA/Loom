@@ -4,22 +4,21 @@ import { setupDomain, verifyDomain } from '../api/ClientsApi';
 const DomainSetup = ({ clientId, onDomainVerified }) => {
   const [domain, setDomain] = useState('');
   const [verificationInProgress, setVerificationInProgress] = useState(false);
-  const [dnsRecordsInstruction, setDnsRecordsInstruction] = useState('');
+  const [dnsRecords, setDnsRecords] = useState([]);
   const [verificationMessage, setVerificationMessage] = useState('');
 
- const handleDomainSubmit = async () => {
-  try {
-    setVerificationInProgress(true);
-    const setupResponse = await setupDomain(clientId, `video.${domain}`);
-    setDnsRecordsInstruction(setupResponse.dns_records); // Assuming the API sends an array of records
-    setVerificationInProgress(false);
-  } catch (error) {
-    console.error('Error setting up domain:', error);
-    alert('Failed to initiate domain setup. Please try again.');
-    setVerificationInProgress(false);
-  }
-};
-
+  const handleDomainSubmit = async () => {
+    try {
+      setVerificationInProgress(true);
+      const setupResponse = await setupDomain(clientId, `video.${domain}`);
+      setDnsRecords(setupResponse.dns_records); // Now we directly set the array of records
+      setVerificationInProgress(false);
+    } catch (error) {
+      console.error('Error setting up domain:', error);
+      alert('Failed to initiate domain setup. Please try again.');
+      setVerificationInProgress(false);
+    }
+  };
 
   const handleVerifyDomain = async () => {
     setVerificationInProgress(true);
@@ -37,7 +36,7 @@ const DomainSetup = ({ clientId, onDomainVerified }) => {
   return (
     <div>
       <h2>Setup Your Custom Domain</h2>
-      {!dnsRecordsInstruction && (
+      {!verificationInProgress && !dnsRecords.length && (
         <>
           <input
             type="text"
@@ -46,14 +45,24 @@ const DomainSetup = ({ clientId, onDomainVerified }) => {
             placeholder="Enter your custom domain without 'video.' prefix"
             disabled={verificationInProgress}
           />
-          <button onClick={handleDomainSubmit} disabled={verificationInProgress}>Setup Domain</button>
+          <button onClick={handleDomainSubmit} disabled={verificationInProgress || !domain.trim()}>
+            Setup Domain
+          </button>
         </>
       )}
-      {dnsRecordsInstruction && (
+      {dnsRecords.length > 0 && (
         <>
           <p>Please add the following DNS records to your domain's settings:</p>
-          <code>{dnsRecordsInstruction}</code>
-          <button onClick={handleVerifyDomain} disabled={verificationInProgress}>Verify Domain</button>
+          <ul>
+            {dnsRecords.map((record, index) => (
+              <li key={index}>
+                Type: {record.record_type}, Host: {record.host}, Points to: {record.points_to}, TTL: {record.ttl}
+              </li>
+            ))}
+          </ul>
+          <button onClick={handleVerifyDomain} disabled={verificationInProgress}>
+            Verify Domain
+          </button>
         </>
       )}
       <p>{verificationMessage}</p>
