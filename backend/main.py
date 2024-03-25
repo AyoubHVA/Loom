@@ -9,8 +9,10 @@ from fastapi.responses import JSONResponse
 
 from database import get_client_collection, get_prospect_collection
 from model import Client, Prospect, LoomUrlUpdate, DomainSetup, DomainSetupResponse, DNSInstruction
+from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 origins = [
     "http://localhost:8000",
@@ -170,8 +172,6 @@ async def setup_domain(domain_setup: DomainSetup, clients=Depends(get_client_col
                 "status": "existing"
             }
         )
-
-    # Setup domain logic goes here, for a new domain setup
 
     # If the domain is new for the client, then proceed with the setup
     update_result = await clients.update_one(
