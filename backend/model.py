@@ -18,6 +18,7 @@ class Client(BaseModel):
     created_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
     additional_info: Dict[str, str]
     sl_analytics: Dict[str, str]
+    client_logo: Optional[str] = None
 
     class Config:
         arbitrary_types_allowed = True
