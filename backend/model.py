@@ -35,6 +35,7 @@ class Prospect(BaseModel):
     company_name: str
     domain: Optional[str] = None
     loom_video_url: Optional[str] = None
+    calendly_url: Optional[str] = None
 
     class Config:
         arbitrary_types_allowed = True

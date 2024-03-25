@@ -194,7 +194,7 @@ async def setup_domain(domain_setup: DomainSetup, clients=Depends(get_client_col
             "message": "Domain setup initiated successfully.",
             "client_id": client_id,
             "domain": domain,
-            "dns_records": [dns_instructions.dict()]  # Use Pydantic's dict method
+            "dns_records": [dns_instructions.dict()]
         }
     )
 
